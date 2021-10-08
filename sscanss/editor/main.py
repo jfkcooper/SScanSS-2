@@ -13,6 +13,7 @@ from sscanss.core.scene import OpenGLRenderer, SceneManager
 from sscanss.core.util import Directions, Attributes
 from sscanss.editor.dialogs import CalibrationWidget, Controls
 from sscanss.editor.editor import Editor
+from sscanss.themes import Themes
 
 
 MAIN_WINDOW_TITLE = 'Instrument Editor'
@@ -85,7 +86,7 @@ class Window(QtWidgets.QMainWindow):
         
         self.setMinimumSize(1024, 800)
         self.setTitle()
-        self.setWindowIcon(QtGui.QIcon(":/images/editor-logo.ico"))
+        self.setWindowIcon(QtGui.QIcon(Themes().pathFor("editor-logo.png")))
 
         self.initActions()
         self.initMenus()
@@ -447,6 +448,7 @@ if __name__ == '__main__':
     setup_logging('editor.log')
     app = QtWidgets.QApplication([])
     app.setStyleSheet(style)
+    app.setAttribute(QtCore.Qt.AA_DisableWindowContextHelpButton)
     window = Window()
 
     if sys.argv[1:]:

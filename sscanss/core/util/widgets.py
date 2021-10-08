@@ -2,7 +2,7 @@ from enum import Enum, unique
 import os
 import re
 from PyQt5 import QtGui, QtWidgets, QtCore
-from ...config import path_for
+from ...themes import Themes
 
 
 def create_icon(colour, size):
@@ -35,7 +35,7 @@ def create_header(text):
     return label
 
 
-def create_tool_button(checkable=False, checked=False, tooltip='', style_name='', icon_path='', hide=False,
+def create_tool_button(checkable=False, checked=False, tooltip='', style_name='', icon_name=None, hide=False,
                        text='', status_tip='', show_text=False):
     """Creates tool button
 
@@ -47,8 +47,8 @@ def create_tool_button(checkable=False, checked=False, tooltip='', style_name=''
     :type tooltip: str
     :param style_name: style name
     :type style_name: str
-    :param icon_path: path to icon
-    :type icon_path: str
+    :param icon_name: icon enum
+    :type icon_name: ThemeManager.Icon
     :param hide: flag that indicates button is hidden
     :type hide: bool
     :param text: button text
@@ -70,8 +70,9 @@ def create_tool_button(checkable=False, checked=False, tooltip='', style_name=''
     if hide:
         button.setVisible(False)
 
-    if icon_path:
-        button.setIcon(QtGui.QIcon(icon_path))
+    if icon_name is not None:
+        theme = Themes()
+        button.setIcon(theme.getIcon(icon_name))
 
     if show_text:
         button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
@@ -219,6 +220,9 @@ class Pane(QtWidgets.QWidget):
 
         self.header = QtWidgets.QWidget()
         self.toggle_icon = QtWidgets.QLabel()
+
+        self.createIcons()
+
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(pane_widget)
         layout.addStretch(1)
@@ -240,6 +244,11 @@ class Pane(QtWidgets.QWidget):
         self.context_menu = QtWidgets.QMenu()
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.showContextMenu)
+
+    def createIcons(self):
+        theme = Themes()
+        self.down_arrow = theme.getIcon(theme.Icons.Down_Triangle).pixmap(20, 20)
+        self.right_arrow = theme.getIcon(theme.Icons.Right_Triangle).pixmap(20, 20)
 
     def paintEvent(self, event):
         opt = QtWidgets.QStyleOption()
@@ -272,10 +281,10 @@ class Pane(QtWidgets.QWidget):
         """
         if visible:
             self.content.hide()
-            self.toggle_icon.setPixmap(QtGui.QPixmap(path_for('right_arrow.png')))
+            self.toggle_icon.setPixmap(self.right_arrow)
         else:
             self.content.show()
-            self.toggle_icon.setPixmap(QtGui.QPixmap(path_for('down_arrow.png')))
+            self.toggle_icon.setPixmap(self.down_arrow)
 
     def addContextMenuAction(self, action):
         """Adds action to context menu

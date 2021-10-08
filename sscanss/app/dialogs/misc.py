@@ -5,11 +5,12 @@ import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from sscanss.config import path_for, __version__, settings
+from sscanss.config import __version__, settings
 from sscanss.core.instrument import IKSolver
 from sscanss.core.util import (DockFlag, Attributes, Accordion, Pane, create_tool_button, Banner, compact_path,
                                StyledTabWidget)
 from sscanss.app.widgets import AlignmentErrorModel, ErrorDetailModel, CenteredBoxProxy
+from sscanss.themes import Themes
 
 
 class AboutDialog(QtWidgets.QDialog):
@@ -29,7 +30,7 @@ class AboutDialog(QtWidgets.QDialog):
         self.main_layout.setContentsMargins(1, 1, 1, 1)
 
         img = QtWidgets.QLabel()
-        img.setPixmap(QtGui.QPixmap(path_for('banner.png')))
+        img.setPixmap(QtGui.QPixmap(Themes().pathFor('banner.png')))
         self.main_layout.addWidget(img)
 
         layout = QtWidgets.QVBoxLayout()
@@ -119,7 +120,14 @@ class ProjectDialog(QtWidgets.QDialog):
     def createImageHeader(self):
         """Adds banner image to dialog"""
         img = QtWidgets.QLabel()
-        img.setPixmap(QtGui.QPixmap(path_for('banner.png')))
+
+        theme = Themes()
+        filename = 'banner_light.png'
+
+        if theme.isDarkTheme():
+            filename = 'banner_dark.png'
+
+        img.setPixmap(QtGui.QPixmap(theme.pathFor(filename)))
         self.main_layout.addWidget(img)
 
     def createTabWidgets(self):
@@ -190,15 +198,17 @@ class ProjectDialog(QtWidgets.QDialog):
         self.list_widget.setObjectName('Recents')
         self.list_widget.setSpacing(10)
 
+        theme = Themes()
+        file_icon = theme.getIcon(Themes.Icons.New_File)
         for i in range(self.recent_list_size):
             item = QtWidgets.QListWidgetItem(compact_path(self.recent[i], 70))
             item.setData(QtCore.Qt.UserRole, self.recent[i])
             item.setToolTip(self.recent[i])
-            item.setIcon(QtGui.QIcon(path_for('file-black.png')))
+            item.setIcon(file_icon)
             self.list_widget.addItem(item)
 
         item = QtWidgets.QListWidgetItem('Open ...')
-        item.setIcon(QtGui.QIcon(path_for('folder-open.png')))
+        item.setIcon(theme.getIcon(Themes.Icons.Open_File))
         self.list_widget.addItem(item)
 
         self.list_widget.itemDoubleClicked.connect(self.projectItemDoubleClicked)
@@ -555,7 +565,6 @@ class CalibrationErrorDialog(QtWidgets.QDialog):
 
         self.updateTable(pose_id, fiducial_id, error)
         self.setMinimumSize(800, 720)
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.setWindowTitle('Error Report for Base Computation')
 
     def updateTable(self, pose_id, fiducial_id, error):
@@ -645,7 +654,6 @@ class SampleExportDialog(QtWidgets.QDialog):
 
         self.setLayout(layout)
         self.setWindowTitle('Select Sample to Save ...')
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
 
     @property
     def selected(self):
@@ -706,12 +714,12 @@ class SimulationDialog(QtWidgets.QWidget):
 
         self.path_length_button = create_tool_button(tooltip='Plot Path Length', style_name='ToolButton',
                                                      status_tip='Plot calculated path length for current simulation',
-                                                     icon_path=path_for('line-chart.png'))
+                                                     icon_name=Themes.Icons.Chart)
         self.path_length_button.clicked.connect(self.parent.showPathLength)
 
         self.export_button = create_tool_button(tooltip='Export Script', style_name='ToolButton',
                                                 status_tip='Export script for current simulation',
-                                                icon_path=path_for('export.png'))
+                                                icon_name=Themes.Icons.Export)
         self.export_button.clicked.connect(self.parent.showScriptExport)
 
         button_layout.addWidget(self.path_length_button)
@@ -800,16 +808,16 @@ class SimulationDialog(QtWidgets.QWidget):
 
         hide_good_result = create_tool_button(checkable=True, checked=True, tooltip='0 results succeeded',
                                               text='0', show_text=True, style_name='ToolButton',
-                                              icon_path=path_for('check-circle.png'))
+                                              icon_name=Themes.Icons.Circle_Check)
         hide_warn_result = create_tool_button(checkable=True, checked=True, tooltip='0 results with warnings',
                                               text='0', show_text=True, style_name='ToolButton',
-                                              icon_path=path_for('exclamation-circle.png'))
+                                              icon_name=Themes.Icons.Circle_Exclaim)
         hide_failed_result = create_tool_button(checkable=True, checked=True, tooltip='0 results failed', text='0',
                                                 show_text=True, style_name='ToolButton',
-                                                icon_path=path_for('times-circle.png'))
+                                                icon_name=Themes.Icons.Circle_Cross)
         hide_skipped_result = create_tool_button(checkable=True, checked=True, tooltip='0 results skipped',
                                                  hide=True, text='0', show_text=True, style_name='ToolButton',
-                                                 icon_path=path_for('minus-circle.png'))
+                                                 icon_name=Themes.Icons.Circle_Minus)
 
         self.filter_button_group.addButton(hide_good_result, self.ResultKey.Good.value)
         self.filter_button_group.addButton(hide_warn_result, self.ResultKey.Warn.value)
@@ -994,30 +1002,31 @@ class SimulationDialog(QtWidgets.QWidget):
         sub_layout = QtWidgets.QHBoxLayout()
         layout.addLayout(sub_layout)
 
+        theme = Themes()
         tool_tip_duration = 1800000
         if show_collision:
             icon = QtWidgets.QLabel()
             icon.setToolTip('Collision Detected')
             icon.setToolTipDuration(tool_tip_duration)
-            icon.setPixmap(QtGui.QPixmap(path_for('collision.png')).scaled(25, 25))
+            icon.setPixmap(theme.getIcon(Themes.Icons.ERROR_Collision).pixmap(25, 25))
             sub_layout.addWidget(icon)
 
         tool_tip = ''
-        icon_path = ''
+        icon_name = ''
         if status == IKSolver.Status.HardwareLimit:
             tool_tip = 'Hardware limits violation'
-            icon_path = 'limit_hit.png'
+            icon_name = Themes.Icons.ERROR_Limit_Hit# 'limit_hit.png'
         elif status == IKSolver.Status.Unreachable:
             tool_tip = 'Orientation is not reachable by the positioner'
-            icon_path = 'unreachable.png'
+            icon_name = Themes.Icons.ERROR_Unreachable#'unreachable.png'
         elif status == IKSolver.Status.DeformedVectors:
             tool_tip = 'Angle between measurement vectors does not match q-vectors'
-            icon_path = 'deformed.png'
+            icon_name = Themes.Icons.ERROR_Deformed#'deformed.png'
 
-        if icon_path and tool_tip:
+        if icon_name and tool_tip:
             icon = QtWidgets.QLabel()
             icon.setToolTip(tool_tip)
-            icon.setPixmap(QtGui.QPixmap(path_for(icon_path)).scaled(25, 25))
+            icon.setPixmap(theme.getIcon(icon_name).pixmap(25, 25))
             icon.setToolTipDuration(tool_tip_duration)
             sub_layout.addWidget(icon)
         sub_layout.addStretch(1)
@@ -1149,7 +1158,6 @@ class ScriptExportDialog(QtWidgets.QDialog):
         self.setLayout(main_layout)
         self.setMinimumSize(640, 560)
         self.setWindowTitle('Export Script')
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
     def createTemplateKeys(self):
@@ -1277,7 +1285,6 @@ class PathLengthPlotter(QtWidgets.QDialog):
 
         self.setMinimumSize(800, 800)
         self.setWindowTitle('Path Length')
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.plot()
 

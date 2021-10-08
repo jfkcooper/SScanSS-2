@@ -6,7 +6,7 @@ import shutil
 import sys
 import PyInstaller.__main__ as pyi
 from PyQt5.pyrcc_main import processResourceFile
-from sscanss.__version import __version__
+from sscanss.version import __version__
 
 IS_WINDOWS = sys.platform.startswith('win')
 PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -69,7 +69,7 @@ def build_editor():
     pyi_args.extend(['--exclude-module', 'matplotlib', '--exclude-module', 'hdf5',
                      '--hidden-import', 'PyQt5.QtPrintSupport', *EXCLUDED_IMPORT, *HIDDEN_IMPORT])
 
-    pyi_args.extend(['--icon',  os.path.join(INSTALLER_PATH, 'icons', 'editor-logo.ico')])
+    pyi_args.extend(['--icon',  os.path.join(INSTALLER_PATH, 'windows', 'editor-logo.ico')])
     pyi.run(pyi_args)
     shutil.rmtree(work_path)
 
@@ -88,7 +88,7 @@ def build_sscanss():
                      *EXCLUDED_IMPORT, *HIDDEN_IMPORT])
 
     if IS_WINDOWS:
-        pyi_args.extend(['--icon',  os.path.join(INSTALLER_PATH, 'icons', 'logo.ico')])
+        pyi_args.extend(['--icon',  os.path.join(INSTALLER_PATH, 'windows', 'logo.ico')])
 
     pyi.run(pyi_args)
 
@@ -118,7 +118,6 @@ if __name__ == '__main__':
     parser.add_argument('--skip-editor', action='store_true', help='This builds sscanss without the editor.')
     args = parser.parse_args()
 
-    build_resource_file()
     compile_log_config_and_schema()
 
     success = True

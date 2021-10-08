@@ -1,13 +1,15 @@
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
-from sscanss.config import path_for
 from sscanss.core.util import to_float
+from sscanss.themes import Themes
 
 
 class CenteredBoxProxy(QtWidgets.QProxyStyle):
     """Ensures checkbox is centred in the table cell"""
     def __init__(self):
-        super().__init__()
+        theme = Themes()
+        style = 'Fusion' if theme.current_theme != 'default' else theme.default_style
+        super().__init__(style)
 
     def subElementRect(self, element, option, widget):
         rect = super().subElementRect(element, option, widget)
@@ -15,7 +17,7 @@ class CenteredBoxProxy(QtWidgets.QProxyStyle):
             if option.index.flags() & QtCore.Qt.ItemIsUserCheckable != QtCore.Qt.NoItemFlags:
                 text_margin = widget.style().pixelMetric(QtWidgets.QStyle.PM_FocusFrameHMargin) + 1
                 rect = QtWidgets.QStyle.alignedRect(option.direction, QtCore.Qt.AlignCenter,
-                                                    QtCore.QSize(option.decorationSize.width() + 5,
+                                                    QtCore.QSize(option.decorationSize.width() + 1,
                                                                  option.decorationSize.height()),
                                                     QtCore.QRect(option.rect.x() + text_margin, option.rect.y(),
                                                                  option.rect.width() - (2 * text_margin),
@@ -132,9 +134,9 @@ class PointModel(QtCore.QAbstractTableModel):
     def headerData(self, index, orientation, role):
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DecorationRole:
             if index == 3:
-                pixmap = QtGui.QPixmap(self.header_icon)
-                pixmap = pixmap.scaled(100, 100, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+                pixmap = self.header_icon.pixmap(100, 100)
                 return QtCore.QVariant(pixmap)
+
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
             if index != 3:
                 return QtCore.QVariant(self.title[index])
@@ -164,12 +166,13 @@ class PointModel(QtCore.QAbstractTableModel):
 
     def setHeaderIcon(self):
         """Updates header icons to match data enabled state"""
+        theme = Themes()
         if np.all(self._data.enabled):
-            self.header_icon = path_for('checked.png')
+            self.header_icon = theme.getIcon(theme.Icons.Checked)
         elif np.any(self._data.enabled):
-            self.header_icon = path_for('intermediate.png')
+            self.header_icon = theme.getIcon(theme.Icons.Indeterminate)
         else:
-            self.header_icon = path_for('unchecked.png')
+            self.header_icon = theme.getIcon(theme.Icons.Unchecked)
         self.headerDataChanged.emit(QtCore.Qt.Horizontal, 3, 3)
 
 
@@ -244,7 +247,7 @@ class AlignmentErrorModel(QtCore.QAbstractTableModel):
                 if self.error[index.row()] < self.tolerance:
                     return QtGui.QBrush(QtGui.QColor(50, 153, 95))
                 elif self.error[index.row()] >= self.tolerance:
-                    return QtGui.QBrush(QtGui.QColor(255, 00, 0))
+                    return QtGui.QBrush(QtGui.QColor(255, 0, 0))
 
         return QtCore.QVariant()
 

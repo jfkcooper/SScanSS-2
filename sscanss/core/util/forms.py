@@ -325,7 +325,7 @@ class FormControl(QtWidgets.QWidget):
         self.form_lineedit.setMaxLength(255)
         self.validation_label = QtWidgets.QLabel()
         self.validation_label.setWordWrap(True)
-        self.validation_label.setStyleSheet('color: red')
+        self.validation_label.setObjectName('Error')
         self._validator = None
         self.extra = []
 
@@ -460,7 +460,9 @@ class FormControl(QtWidgets.QWidget):
 
     def isValid(self):
         """Puts the control to an valid state """
-        self.form_lineedit.setStyleSheet('')
+        self.form_lineedit.setObjectName('')
+        self.style().unpolish(self.form_lineedit)
+        self.style().polish(self.form_lineedit)
         self.validation_label.setText('')
         self.valid = True
         self.inputValidation.emit(True)
@@ -471,7 +473,9 @@ class FormControl(QtWidgets.QWidget):
         :param error: error message
         :type error: str
         """
-        self.form_lineedit.setStyleSheet('border: 1px solid red;')
+        self.form_lineedit.setObjectName('Error-Outline')
+        self.style().unpolish(self.form_lineedit)
+        self.style().polish(self.form_lineedit)
         self.validation_label.setText(error)
         self.valid = False
         self.inputValidation.emit(False)

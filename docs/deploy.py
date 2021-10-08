@@ -2,7 +2,7 @@ import os
 import shutil
 import sys
 sys.path.insert(0, os.path.abspath('..'))
-from sscanss.__version import __version__
+from sscanss.version import __version__
 
 ref = 'master'
 if len(sys.argv) > 1 and sys.argv[1].strip().endswith(__version__):

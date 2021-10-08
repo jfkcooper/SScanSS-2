@@ -7,8 +7,7 @@ import sys
 from OpenGL.plugins import FormatHandler
 from PyQt5 import QtCore
 from sscanss.__config_data import log_config
-import sscanss.__resource
-from sscanss.__version import __version__, __editor_version__
+from sscanss.version import __version__, __editor_version__
 
 
 if getattr(sys, 'frozen', False):
@@ -22,16 +21,11 @@ UPDATE_URL = 'https://api.github.com/repos/ISISNeutronMuon/SScanSS-2/releases/la
 RELEASES_URL = 'https://github.com/ISISNeutronMuon/SScanSS-2/releases'
 INSTRUMENTS_PATH = SOURCE_PATH / 'instruments'
 CUSTOM_INSTRUMENTS_PATH = pathlib.Path.home() / 'Documents' / 'SScanSS 2' / 'instruments'
-STATIC_PATH = SOURCE_PATH / 'static'
-IMAGES_PATH = STATIC_PATH / 'images'
-
+ICONS_PATH = SOURCE_PATH / 'static' / 'icons'
+THEME_PATH = SOURCE_PATH / 'static' / 'themes'
 
 # Tells OpenGL to use the NumpyHandler for the Matrix44 objects
 FormatHandler('sscanss', 'OpenGL.arrays.numpymodule.NumpyHandler', ['sscanss.core.math.matrix.Matrix44'])
-
-
-def path_for(filename):
-    return (IMAGES_PATH / filename).as_posix()
 
 
 @unique
@@ -44,6 +38,7 @@ class Group(Enum):
 @unique
 class Key(Enum):
     Geometry = 'Geometry'
+    Theme = 'Theme'
     Check_Update = 'Check_Update'
     Recent_Projects = 'Recent_Projects'
     Align_First = f'{Group.Simulation.value}/Align_First'
@@ -92,7 +87,7 @@ class SettingItem:
 
 __defaults__ = {Key.Geometry: SettingItem(bytearray(b'')), Key.Check_Update: SettingItem(True),
                 Key.Skip_Zero_Vectors: SettingItem(False), Key.Align_First: SettingItem(True),
-                Key.Recent_Projects: SettingItem([], sub_type=str),
+                Key.Theme: SettingItem('default'), Key.Recent_Projects: SettingItem([], sub_type=str),
                 Key.Local_Max_Eval: SettingItem(1000, limits=(500, 5000)),
                 Key.Global_Max_Eval: SettingItem(200, limits=(50, 500)),
                 Key.Angular_Stop_Val: SettingItem(1.00, limits=(0.000, 360.000)),

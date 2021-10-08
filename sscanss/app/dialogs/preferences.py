@@ -80,7 +80,6 @@ class Preferences(QtWidgets.QDialog):
 
         self.setWindowTitle('Preferences')
         self.setMinimumSize(640, 480)
-        self.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
     def createForms(self):
@@ -245,6 +244,22 @@ class Preferences(QtWidgets.QDialog):
         path_picker.value_changed.connect(self.changeSetting)
         layout.addWidget(path_picker)
         main_layout.addLayout(layout)
+
+        layout = QtWidgets.QHBoxLayout()
+        key = settings.Key.Theme
+        self.global_names.append(key)
+        value = settings.value(key)
+        layout.addWidget(QtWidgets.QLabel('Theme: '))
+        combo_box = QtWidgets.QComboBox()
+        theme_names = tuple(self.parent().theme.themes)
+        combo_box.addItems(theme_names)
+        combo_box.setProperty(self.prop_name, (key, value))
+        combo_box.setCurrentIndex(theme_names.index(value) if value in theme_names else 0)
+        combo_box.currentIndexChanged.connect(lambda i, v=theme_names: self.changeSetting(v[i]))
+        layout.addWidget(combo_box, 2)
+        layout.addStretch(2)
+        main_layout.addLayout(layout)
+        main_layout.addWidget(QtWidgets.QLabel('<i>Changing Theme will require a restart.</i>'))
 
         main_layout.addStretch(1)
         frame.setLayout(main_layout)

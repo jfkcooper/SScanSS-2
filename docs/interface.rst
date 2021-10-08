@@ -84,7 +84,8 @@ The Preferences contains settings to customize SScanSS 2. The preference dialog 
 
 The preferences dialog divides the setting into 3 sections: General, Graphics and Simulation.
 
-* In the General section, global settings such as custom instrument path and update checks can be changed.
+* In the General section, global settings such as custom instrument path and update checks can be changed. Themes can
+  also be changed from this section (the theme will be apply after the software restarts).
 * In the Graphics section, the colour and sizes of most rendered object can be changed, all the graphics settings
   are self-explanatory.
 * In the Simulation section, the simulation accuracy, order etc. can be tweaked, each setting is explained in detail

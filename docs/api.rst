@@ -8,3 +8,4 @@ Developer guide
     customize_script
     editor
     calibration
+    themes

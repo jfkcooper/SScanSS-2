@@ -1,0 +1,14 @@
+{
+    "foreground": "#efefef",
+    "background": "#353535",
+    "background.alternate": "#191919",
+    "highlight": "#2A82DA",
+	"highlight.alternate": "#000",
+    "midtone": "#808080",
+    "error.background": "#823129",
+    "error.foreground": "#F6A7A3",
+    "warning.background": "#8f6d00",
+    "warning.foreground": "#FBD34D",
+    "info.background": "#197080",
+    "info.foreground": "#D1ECF1"
+}

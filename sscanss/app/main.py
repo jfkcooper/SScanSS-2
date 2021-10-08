@@ -1,10 +1,9 @@
-from contextlib import suppress
 import logging
 import multiprocessing
 import pathlib
 import sys
 from PyQt5 import QtCore, QtWidgets
-from sscanss.config import setup_logging, STATIC_PATH, IMAGES_PATH
+from sscanss.config import setup_logging
 from sscanss.app.window.view import MainWindow
 
 
@@ -15,12 +14,7 @@ def ui_execute():
     :rtype: int
     """
     app = QtWidgets.QApplication(sys.argv[:1])
-
-    # Load global style
-    with suppress(FileNotFoundError):
-        with open(STATIC_PATH / 'style.css', 'rt') as stylesheet:
-            style = stylesheet.read().replace('@Path', IMAGES_PATH.as_posix())
-            app.setStyleSheet(style)
+    app.setAttribute(QtCore.Qt.AA_DisableWindowContextHelpButton)
 
     window = MainWindow()
 

@@ -1,9 +1,9 @@
 from enum import Enum, unique
 from PyQt5 import QtCore, QtWidgets
-from sscanss.config import path_for
 from sscanss.core.geometry import BoundingBox, point_selection
 from sscanss.core.math import is_close, Matrix44, Plane, rotation_btw_vectors, Vector3
 from sscanss.core.util import TransformType, DockFlag, PlaneOptions, create_tool_button, FormControl, FormGroup, Banner
+from sscanss.themes import Themes
 
 
 class TransformDialog(QtWidgets.QWidget):
@@ -507,20 +507,20 @@ class PlaneAlignmentTool(QtWidgets.QWidget):
         layout.addWidget(self.table_widget)
 
         button_layout = QtWidgets.QVBoxLayout()
-        self.select_button = create_tool_button(icon_path=path_for('select.png'), checkable=True, checked=True,
+        self.select_button = create_tool_button(icon_name=Themes.Icons.Select, checkable=True, checked=True,
                                                 status_tip=f'Normal scene manipulation with the mouse',
                                                 tooltip='Normal Mode', style_name='ToolButton')
         self.select_button.clicked.connect(lambda: self.togglePicking(False))
         button_layout.addWidget(self.select_button)
 
-        self.pick_button = create_tool_button(icon_path=path_for('point.png'), checkable=True,
+        self.pick_button = create_tool_button(icon_name=Themes.Icons.Point, checkable=True,
                                               status_tip=f'Select 3D points that define the plane',
                                               tooltip='Pick Point Mode', style_name='ToolButton')
 
         self.pick_button.clicked.connect(lambda: self.togglePicking(True))
         button_layout.addWidget(self.pick_button)
 
-        self.delete_button = create_tool_button(icon_path=path_for('cross.png'), style_name='ToolButton',
+        self.delete_button = create_tool_button(icon_name=Themes.Icons.Cross, style_name='ToolButton',
                                                 status_tip=f'Remove selected points from the scene',
                                                 tooltip='Delete Points')
         self.delete_button.clicked.connect(self.removePicks)

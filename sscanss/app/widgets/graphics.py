@@ -318,7 +318,7 @@ class GraphicsScene(QtWidgets.QGraphicsScene):
 
         self.scale = scale
         self.point_size = 6 * scale
-        self.path_pen = QtGui.QPen(QtCore.Qt.black, 0)
+        self.path_pen = QtGui.QPen(self.palette().windowText().color(), 0)
 
         self.item_to_draw = None
         self.current_obj = None
@@ -493,7 +493,7 @@ class GraphicsScene(QtWidgets.QGraphicsScene):
 
 
 class GraphicsPointItem(QtWidgets.QAbstractGraphicsShapeItem):
-    def __init__(self, point, *args, size=6, **kwargs):
+    def __init__(self, point, size=6, fixed=False):
         """Creates a shape item for points in graphics view. The point is drawn as a cross with
         equal width and height.
 
@@ -501,12 +501,14 @@ class GraphicsPointItem(QtWidgets.QAbstractGraphicsShapeItem):
         :type point: QtCore.QPoint
         :param size: pixel size of point
         :type size: int
+        :param fixed: indicates point is unmovable
+        :type fixed: bool
         """
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
         self.size = size
         self.setPos(point)
-        self.fixed = False
+        self.fixed = fixed
         self.setFlag(QtWidgets.QGraphicsItem.ItemSendsGeometryChanges)
 
     def makeControllable(self, flag):
@@ -533,9 +535,8 @@ class GraphicsPointItem(QtWidgets.QAbstractGraphicsShapeItem):
         return QtCore.QRectF(top, top, new_size, new_size)
 
     def paint(self, painter, _options, _widget):
-        pen = self.pen()
-        painter.setPen(pen)
-        painter.setBrush(self.brush())
+        painter.setPen(self.pen())
+        painter.setBrush(QtCore.Qt.NoBrush)
 
         half = self.size * 0.5
         painter.drawLine(QtCore.QLineF(-half, -half, half, half))
@@ -543,9 +544,7 @@ class GraphicsPointItem(QtWidgets.QAbstractGraphicsShapeItem):
 
         if self.isSelected():
             painter.save()
-            pen = QtGui.QPen(QtCore.Qt.black, 0, QtCore.Qt.DashLine)
-            painter.setPen(pen)
-            painter.setBrush(QtCore.Qt.NoBrush)
+            painter.setPen(QtGui.QPen(self.pen().color(), 0, QtCore.Qt.DashLine))
             painter.drawRect(self.boundingRect())
             painter.restore()
 

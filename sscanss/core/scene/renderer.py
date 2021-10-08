@@ -11,6 +11,7 @@ from ..math.matrix import Matrix44
 from ..math.vector import Vector3
 from ..util.misc import Attributes
 from ...config import settings
+from ...themes import Themes
 
 
 class OpenGLRenderer(QtWidgets.QOpenGLWidget):
@@ -30,11 +31,10 @@ class OpenGLRenderer(QtWidgets.QOpenGLWidget):
         self.show_coordinate_frame = True
         self.picks = []
         self.picking = False
-        self.default_font = QtGui.QFont("Times", 10)
+        self.default_font = QtGui.QFont('Times', 10)
         self.error = False
         self.custom_error_handler = None
         self.shader_programs = {}
-
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
     def cleanup(self):
@@ -47,6 +47,12 @@ class OpenGLRenderer(QtWidgets.QOpenGLWidget):
     @property
     def picking(self):
         return self._picking
+
+    @property
+    def clear_colour(self):
+        if Themes().isDarkTheme():
+            return Colour(0.8, 0.8, 0.8)
+        return Colour.white()
 
     @picking.setter
     def picking(self, value):
@@ -63,7 +69,8 @@ class OpenGLRenderer(QtWidgets.QOpenGLWidget):
 
     def initializeGL(self):
         try:
-            GL.glClearColor(*Colour.white())
+            # GL.glClearColor(*Colour.namedColour(self._background))
+            GL.glClearColor(*self.clear_colour)
             GL.glColor4f(*Colour.black())
 
             GL.glEnable(GL.GL_DEPTH_TEST)
@@ -134,6 +141,9 @@ class OpenGLRenderer(QtWidgets.QOpenGLWidget):
             return
 
         self.error = False
+
+        GL.glColor4f(*Colour.black())
+        GL.glClearColor(*self.clear_colour)
 
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
 
@@ -503,6 +513,7 @@ class OpenGLRenderer(QtWidgets.QOpenGLWidget):
             return
 
         scale = self.scene.bounding_box.radius
+        colours = [Colour(0.8, 0.0, 0.0), Colour(0.0, 0.8, 0.0), Colour(0.0, 0.0, 0.8)]
 
         node = BatchRenderNode(3)
         node.render_mode = Node.RenderMode.Solid
@@ -512,7 +523,7 @@ class OpenGLRenderer(QtWidgets.QOpenGLWidget):
                                   [0.0, 0.0, 0.0], [0.0, 0.0, scale]], dtype=np.float32)
 
         node.indices = np.array([0, 1, 2, 3, 4, 5], dtype=np.uint32)
-        node.per_object_colour = [Colour(1.0, 0.0, 0.0), Colour(0.0, 1.0, 0.0), Colour(0.0, 0.0, 1.0)]
+        node.per_object_colour = colours
         node.batch_offsets = [2, 4, 6]
         node.buildVertexBuffer()
 
@@ -528,27 +539,28 @@ class OpenGLRenderer(QtWidgets.QOpenGLWidget):
 
         GL.glPushAttrib(GL.GL_ALL_ATTRIB_BITS)
         painter = QtGui.QPainter(self)
-        painter.setPen(QtGui.QColor.fromRgbF(0.5, 0.5, 0.5))
+        painter.setPen(QtGui.QColor.fromRgbF(0.35, 0.35, 0.35))
         painter.setFont(self.default_font)
 
         # draw origin
         painter.drawEllipse(QtCore.QPointF(origin.x, origin.y), 10, 10)
 
-        axes = [(1, 0, 0, 'X'), (0, 1, 0, 'Y'), (0, 0, 1, 'Z')]
+        labels = ['X', 'Y', 'Z']
+        # axes = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
 
-        for x, y, z, label in axes:
-            painter.setPen(QtGui.QColor.fromRgbF(x, y, z))
+        for i in range(3):
+            colour = colours[i]
+            painter.setPen(QtGui.QColor.fromRgbF(colour.r, colour.g, colour.b))
 
-            x *= scale * 1.01
-            y *= scale * 1.01
-            z *= scale * 1.01
+            axis = [0.0] * 3
+            axis[i] = scale * 1.01
 
-            text_pos, ok = self.project(x, y, z)
+            text_pos, ok = self.project(*axis)
             if not ok:
                 continue
 
             # Render text
-            painter.drawText(QtCore.QPointF(*text_pos[:2]), label)
+            painter.drawText(QtCore.QPointF(*text_pos[:2]), labels[i])
 
         painter.end()
         GL.glPopAttrib()
